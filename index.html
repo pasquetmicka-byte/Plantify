@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#238b57">
+<title>Plantify — Mes plantes</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#eef4ef;color:#17231c}
+.app{max-width:430px;margin:auto;min-height:100vh;background:#fff;position:relative;overflow:hidden}
+.screen{display:none;min-height:100vh;padding-bottom:82px}.screen.active{display:block}
+.top{padding:18px 18px 8px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:800;display:flex;align-items:center;gap:8px}.leaf{font-size:27px}
+h1{font-size:27px;margin:12px 18px 5px}h2{font-size:18px;margin:18px 18px 10px}
+.sub{color:#718078;font-size:13px}.hero{margin:10px 14px;padding:18px;border-radius:24px;background:linear-gradient(145deg,#f7fff9,#e7f6eb)}
+.identify{background:#26945c;color:white;border-radius:18px;padding:15px;display:flex;align-items:center;gap:13px;box-shadow:0 8px 20px #268e5730}
+.identify .cam{font-size:29px;background:#fff;color:#238b57;border-radius:50%;width:54px;height:54px;display:grid;place-items:center}
+.btn{border:0;background:#238b57;color:white;padding:13px 18px;border-radius:14px;font-weight:700;font-size:14px;cursor:pointer;width:100%}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px}.cat{border:1px solid #e4ece6;border-radius:15px;padding:7px;text-align:center;font-size:11px}.cat img{width:100%;height:62px;object-fit:cover;border-radius:10px}
+.reminder{margin:0 14px;background:#eef8ff;border-radius:15px;padding:14px;display:flex;gap:12px;align-items:center}.drop{font-size:25px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;height:72px;background:#fff;border-top:1px solid #e5ebe7;display:flex;justify-content:space-around;align-items:center;z-index:20}.nav button{border:0;background:none;color:#78847e;font-size:11px}.nav .selected{color:#16804c;font-weight:800}.nav .scan{background:#238b57;color:#fff;border-radius:50%;width:52px;height:52px;font-size:22px}
+.search{margin:10px 14px;padding:12px 15px;border:1px solid #e1e8e3;border-radius:15px;color:#849089}.filters{display:flex;gap:8px;padding:0 14px;overflow:auto}.filter{white-space:nowrap;border:1px solid #dbe5de;border-radius:20px;padding:8px 12px;font-size:12px}.filter.on{background:#238b57;color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}.plant{border:1px solid #e1e8e3;border-radius:16px;overflow:hidden;background:white;box-shadow:0 2px 8px #17321b0b}.plant img{width:100%;height:150px;object-fit:cover}.plant .info{padding:10px}.plant b{font-size:14px}.plant small{display:block;color:#78847e;margin-top:5px}
+.camera{height:calc(100vh - 82px);background:#18231d;position:relative;color:#fff}.camera img{width:100%;height:65%;object-fit:cover;opacity:.78}.corners{position:absolute;left:12%;right:12%;top:21%;height:42%;border:3px solid #fff;border-radius:25px}.cameraTop{position:absolute;top:20px;left:18px;right:18px;display:flex;justify-content:space-between}.shutter{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:#fff;border:7px solid #238b57}.gallery{position:absolute;bottom:27px;left:25px}.cameraHint{position:absolute;bottom:25px;right:25px}
+.result{padding:18px}.resultPhoto{width:110px;height:110px;border-radius:18px;object-fit:cover;float:left;margin-right:15px}.confidence{display:inline-block;background:#e6f7ec;color:#18824e;border-radius:20px;padding:6px 10px;font-size:11px}.clear{clear:both}.care{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.care div{border:1px solid #e2e9e4;border-radius:14px;padding:13px;font-size:12px}.back{border:0;background:none;font-size:25px}
+.profile{text-align:center;padding:30px 18px}.avatar{width:82px;height:82px;border-radius:50%;object-fit:cover}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}.stat{border:1px solid #e2e9e4;border-radius:15px;padding:13px}.stat b{display:block;font-size:20px;color:#16804c}.menu{border:1px solid #e3eae5;border-radius:15px;text-align:left;overflow:hidden}.menu div{padding:16px;border-bottom:1px solid #edf1ee}.menu div:last-child{border:0}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#18231d;color:#fff;padding:11px 15px;border-radius:12px;font-size:12px;display:none;z-index:50}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="home" class="screen active">
+ <div class="top"><div class="logo"><span class="leaf">🌿</span>Plantify</div><span>🔔</span></div>
+ <div style="padding:0 18px"><div class="sub">Vos plantes, notre passion 🌱</div></div>
+ <div class="hero"><h2 style="margin:0 0 5px">Bonjour ! 👋</h2><p class="sub">Prenez soin de vos plantes, elles vous le rendront bien !</p>
+ <div class="identify" onclick="show('scanner')"><div class="cam">📷</div><div><b>Identifier une plante</b><br><span style="font-size:11px">Prenez une photo et laissez l'IA la reconnaître</span></div><b>›</b></div></div>
+ <h2>Mes plantes <span class="sub">12 plantes</span></h2>
+ <div class="cards"><div class="cat"><img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300"><b>Toutes</b><br>12</div><div class="cat"><img src="https://images.unsplash.com/photo-1597055181300-a8f73ea2c6f0?w=300"><b>Intérieur</b><br>10</div><div class="cat"><img src="https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=300"><b>Extérieur</b><br>2</div><div class="cat"><img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=300"><b>Potager</b><br>0</div></div>
+ <h2>Rappels d'entretien</h2><div class="reminder"><span class="drop">💧</span><div><b>2 plantes à arroser</b><br><span class="sub">Monstera, Pothos</span></div><b style="margin-left:auto">›</b></div>
+</section>
+
+<section id="plants" class="screen">
+ <div class="top"><h1 style="margin:0">Mes plantes</h1><button class="back" onclick="show('scanner')">＋</button></div>
+ <div class="search">🔎 Rechercher une plante...</div><div class="filters"><span class="filter on">Toutes (12)</span><span class="filter">Intérieur (10)</span><span class="filter">Extérieur (2)</span><span class="filter">Potager (0)</span></div>
+ <div class="grid">
+  <div class="plant" onclick="show('detail')"><img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500"><div class="info"><b>Monstera deliciosa</b><small>💧 Arrosage : 3 jours</small></div></div>
+  <div class="plant"><img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500"><div class="info"><b>Pothos</b><small>💧 Arrosage : 5 jours</small></div></div>
+  <div class="plant"><img src="https://images.unsplash.com/photo-1593691509543-c55fb32e5cee?w=500"><div class="info"><b>Sansevieria</b><small>💧 Arrosage : 7 jours</small></div></div>
+  <div class="plant"><img src="https://images.unsplash.com/photo-1526397751294-331021109fbd?w=500"><div class="info"><b>Orchidée</b><small>💧 Arrosage : 6 jours</small></div></div>
+ </div>
+</section>
+
+<section id="scanner" class="screen">
+ <div class="camera"><div class="cameraTop"><button class="back" style="color:#fff" onclick="show('home')">×</button><span>⚡</span></div>
+ <img id="cameraImage" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=900">
+ <div class="corners"></div><div class="gallery">🖼️ Galerie</div><div class="cameraHint">Photo</div>
+ <button class="shutter" onclick="identify()"></button>
+ <input id="file" type="file" accept="image/*" capture="environment" style="display:none" onchange="preview(event)">
+ </div>
+</section>
+
+<section id="result" class="screen"><div class="top"><button class="back" onclick="show('scanner')">‹</button><span>Partager</span></div>
+ <div class="result"><img class="resultPhoto" id="resultPhoto" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500"><span class="confidence">Confiance : 98%</span><h1 style="margin:8px 0 3px">Monstera deliciosa</h1><div class="sub">(Monstera) · Famille : Aracées</div><div class="clear"></div>
+ <p>La Monstera deliciosa est une plante tropicale très appréciée pour ses grandes feuilles découpées et son aspect exotique.</p><h2 style="margin-left:0">Conseils d'entretien</h2>
+ <div class="care"><div>☀️ <b>Lumière</b><br>Lumière vive indirecte</div><div>💧 <b>Arrosage</b><br>1 fois par semaine</div><div>🌡️ <b>Température</b><br>18–30°C</div><div>💦 <b>Humidité</b><br>Élevée</div></div>
+ <button class="btn" style="margin-top:16px" onclick="addPlant()">＋ Ajouter à ma collection</button></div>
+</section>
+
+<section id="detail" class="screen"><div class="top"><button class="back" onclick="show('plants')">‹</button><span>•••</span></div>
+<img style="width:100%;height:240px;object-fit:cover" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=900">
+<div style="padding:0 18px"><h1 style="margin-left:0">Monstera deliciosa</h1><div class="sub">Monstera · <b style="color:#18824e">Intérieur</b></div>
+<div class="stats"><div class="stat"><span>📅</span><small>Ajoutée</small><b style="font-size:15px">12 mars</b></div><div class="stat"><span>💧</span><small>Dernier arrosage</small><b style="font-size:15px">3 jours</b></div><div class="stat"><span>💦</span><small>Prochain</small><b style="font-size:15px">4 jours</b></div></div>
+<h2 style="margin-left:0">Conditions idéales</h2><div class="care"><div>☀️ Lumière<br><b>Vive indirecte</b></div><div>🌡️ Température<br><b>18–30°C</b></div><div>💧 Humidité<br><b>Élevée</b></div><div>🌱 Croissance<br><b>Active</b></div></div>
+<h2 style="margin-left:0">Notes personnelles</h2><div style="padding:13px;border:1px solid #e1e8e3;border-radius:14px;color:#65736b">Belle croissance depuis l'achat. Feuilles bien vertes !</div>
+<button class="btn" style="margin-top:15px">📈 Voir l'évolution</button></div></section>
+
+<section id="profile" class="screen"><div class="profile"><img class="avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200"><h1 style="margin:8px 0">Mickaël Pasquet</h1><div class="sub">mickael@gmail.com</div>
+<div class="stats"><div class="stat">🌿<b>12</b><small>plantes</small></div><div class="stat">📅<b>5</b><small>rappels</small></div><div class="stat">🌱<b>100%</b><small>passionné</small></div></div>
+<div class="menu"><div>🌿 &nbsp; Mes plantes <span style="float:right">›</span></div><div>◷ &nbsp; Mes rappels <span style="float:right">›</span></div><div>📷 &nbsp; Scanner une plante <span style="float:right">›</span></div><div>📊 &nbsp; Statistiques <span style="float:right">›</span></div><div>❔ &nbsp; Aide & Conseils <span style="float:right">›</span></div><div>⚙️ &nbsp; Paramètres <span style="float:right">›</span></div></div></div>
+</section>
+
+<nav class="nav"><button onclick="show('home')" id="n-home">⌂<br>Accueil</button><button onclick="show('plants')" id="n-plants">♧<br>Plantes</button><button class="scan" onclick="show('scanner')">📷</button><button onclick="show('home')" id="n-rem">♧<br>Rappels</button><button onclick="show('profile')" id="n-profile">♙<br>Profil</button></nav>
+<div id="toast" class="toast"></div>
+</div>
+<script>
+const screens=['home','plants','scanner','result','detail','profile'];
+function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle('active',x===id));window.scrollTo(0,0)}
+function identify(){show('result')}
+function addPlant(){toast('🌿 Plante ajoutée à votre collection !');setTimeout(()=>show('plants'),800)}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',1800)}
+function preview(e){if(e.target.files[0]){let url=URL.createObjectURL(e.target.files[0]);document.getElementById('cameraImage').src=url;document.getElementById('resultPhoto').src=url}}
+document.querySelector('.gallery').onclick=()=>document.getElementById('file').click();
+</script>
+</body></html>
