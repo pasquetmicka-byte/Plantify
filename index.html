@@ -60,9 +60,9 @@ h1{font-size:27px;margin:12px 18px 5px}h2{font-size:18px;margin:18px 18px 10px}
  </div>
 </section>
 
-<section id="result" class="screen"><div class="top"><button class="back" onclick="show('scanner')">‹</button><span>Partager</span></div>
- <div class="result"><img class="resultPhoto" id="resultPhoto" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500"><span class="confidence">Confiance : 98%</span><h1 style="margin:8px 0 3px">Monstera deliciosa</h1><div class="sub">(Monstera) · Famille : Aracées</div><div class="clear"></div>
- <p>La Monstera deliciosa est une plante tropicale très appréciée pour ses grandes feuilles découpées et son aspect exotique.</p><h2 style="margin-left:0">Conseils d'entretien</h2>
+<section id="result" class="screen"><div class="top"><button class="back" onclick="show('scanner')">‹</button><span id="resultShare">Partager</span></div>
+ <div class="result"><img class="resultPhoto" id="resultPhoto" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500"><span class="confidence" id="confidence">Confiance : —</span><h1 style="margin:8px 0 3px" id="resultName">En attente...</h1><div class="sub" id="resultFamily">Identification en cours</div><div class="clear"></div>
+ <p id="resultDescription">Plantify analyse votre photo avec Pl@ntNet.</p><h2 style="margin-left:0">Conseils d'entretien</h2>
  <div class="care"><div>☀️ <b>Lumière</b><br>Lumière vive indirecte</div><div>💧 <b>Arrosage</b><br>1 fois par semaine</div><div>🌡️ <b>Température</b><br>18–30°C</div><div>💦 <b>Humidité</b><br>Élevée</div></div>
  <button class="btn" style="margin-top:16px" onclick="addPlant()">＋ Ajouter à ma collection</button></div>
 </section>
@@ -77,7 +77,7 @@ h1{font-size:27px;margin:12px 18px 5px}h2{font-size:18px;margin:18px 18px 10px}
 
 <section id="profile" class="screen"><div class="profile"><img class="avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200"><h1 style="margin:8px 0">Mickaël Pasquet</h1><div class="sub">mickael@gmail.com</div>
 <div class="stats"><div class="stat">🌿<b>12</b><small>plantes</small></div><div class="stat">📅<b>5</b><small>rappels</small></div><div class="stat">🌱<b>100%</b><small>passionné</small></div></div>
-<div class="menu"><div>🌿 &nbsp; Mes plantes <span style="float:right">›</span></div><div>◷ &nbsp; Mes rappels <span style="float:right">›</span></div><div>📷 &nbsp; Scanner une plante <span style="float:right">›</span></div><div>📊 &nbsp; Statistiques <span style="float:right">›</span></div><div>❔ &nbsp; Aide & Conseils <span style="float:right">›</span></div><div>⚙️ &nbsp; Paramètres <span style="float:right">›</span></div></div></div>
+<div style="margin:15px 0"><button class="btn" onclick="getKey();toast('🔐 Clé Pl@ntNet enregistrée sur ce téléphone')">🔐 Connecter Pl@ntNet</button></div><div class="menu"><div>🌿 &nbsp; Mes plantes <span style="float:right">›</span></div><div>◷ &nbsp; Mes rappels <span style="float:right">›</span></div><div>📷 &nbsp; Scanner une plante <span style="float:right">›</span></div><div>📊 &nbsp; Statistiques <span style="float:right">›</span></div><div>❔ &nbsp; Aide & Conseils <span style="float:right">›</span></div><div>⚙️ &nbsp; Paramètres <span style="float:right">›</span></div></div></div>
 </section>
 
 <nav class="nav"><button onclick="show('home')" id="n-home">⌂<br>Accueil</button><button onclick="show('plants')" id="n-plants">♧<br>Plantes</button><button class="scan" onclick="show('scanner')">📷</button><button onclick="show('home')" id="n-rem">♧<br>Rappels</button><button onclick="show('profile')" id="n-profile">♙<br>Profil</button></nav>
@@ -85,11 +85,47 @@ h1{font-size:27px;margin:12px 18px 5px}h2{font-size:18px;margin:18px 18px 10px}
 </div>
 <script>
 const screens=['home','plants','scanner','result','detail','profile'];
+const PLANTNET_KEY_STORAGE='plantify_plantnet_key';
 function show(id){screens.forEach(x=>document.getElementById(x).classList.toggle('active',x===id));window.scrollTo(0,0)}
-function identify(){show('result')}
-function addPlant(){toast('🌿 Plante ajoutée à votre collection !');setTimeout(()=>show('plants'),800)}
-function toast(t){let x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',1800)}
-function preview(e){if(e.target.files[0]){let url=URL.createObjectURL(e.target.files[0]);document.getElementById('cameraImage').src=url;document.getElementById('resultPhoto').src=url}}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2500)}
+function preview(e){if(e.target.files[0]){let url=URL.createObjectURL(e.target.files[0]);document.getElementById('cameraImage').src=url;document.getElementById('resultPhoto').src=url;window.selectedPlantFile=e.target.files[0];toast('📷 Photo prête. Appuyez sur le bouton rond pour identifier.')}}
+function getKey(){let key=localStorage.getItem(PLANTNET_KEY_STORAGE);if(!key){key=prompt('Collez votre clé API Pl@ntNet (elle reste enregistrée uniquement sur ce téléphone) :');if(key){localStorage.setItem(PLANTNET_KEY_STORAGE,key.trim())}}return key}
+async function identify(){
+ const file=window.selectedPlantFile;
+ if(!file){document.getElementById('file').click();return}
+ const key=getKey(); if(!key)return;
+ show('result');
+ document.getElementById('resultName').textContent='Analyse en cours…';
+ document.getElementById('resultFamily').textContent='Pl@ntNet analyse votre photo';
+ document.getElementById('confidence').textContent='Confiance : …';
+ document.getElementById('resultDescription').textContent='Quelques secondes…';
+ try{
+   const form=new FormData(); form.append('images',file); form.append('organs','auto');
+   const url='https://my-api.plantnet.org/v2/identify/all?lang=fr&nb-results=3&api-key='+encodeURIComponent(key);
+   const r=await fetch(url,{method:'POST',body:form});
+   if(!r.ok){throw new Error('API '+r.status)}
+   const data=await r.json(); const best=data.results&&data.results[0];
+   if(!best){throw new Error('Aucun résultat')}
+   const sp=best.species||{};
+   const common=(sp.commonNames&&sp.commonNames[0])||sp.scientificNameWithoutAuthor||data.bestMatch||'Plante inconnue';
+   const scientific=sp.scientificNameWithoutAuthor||data.bestMatch||'';
+   const family=sp.family?.scientificNameWithoutAuthor||'Famille non déterminée';
+   const pct=Math.round((best.score||0)*100);
+   document.getElementById('resultName').textContent=common;
+   document.getElementById('resultFamily').textContent=(common!==scientific&&scientific?scientific+' · ':'')+'Famille : '+family;
+   document.getElementById('confidence').textContent='Confiance : '+pct+'%';
+   document.getElementById('resultDescription').textContent='Identification réalisée par Pl@ntNet. Vérifiez la photo et le niveau de confiance avant d’ajouter la plante à votre collection.';
+   window.lastIdentification={name:common,scientific,family,score:pct};
+ }catch(err){
+   console.error(err);
+   document.getElementById('resultName').textContent='Identification impossible';
+   document.getElementById('resultFamily').textContent='Vérifiez votre clé API et les autorisations de domaine Pl@ntNet.';
+   document.getElementById('confidence').textContent='Confiance : —';
+   document.getElementById('resultDescription').textContent='Vous pouvez réessayer avec une photo nette de la plante, idéalement la feuille ou la fleur.';
+   toast('❌ La reconnaissance a échoué');
+ }
+}
+function addPlant(){const n=window.lastIdentification?.name||'Plante identifiée';toast('🌿 '+n+' ajoutée à votre collection !');setTimeout(()=>show('plants'),900)}
 document.querySelector('.gallery').onclick=()=>document.getElementById('file').click();
 </script>
 </body></html>
