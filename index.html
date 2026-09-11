@@ -96,20 +96,29 @@ async function identify(){
  const key=getKey(); if(!key)return;
  show('result');
  document.getElementById('resultName').textContent='Analyse en cours…';
- document.getElementById('resultFamily').textContent='Pl@ntNet analyse votre photo';
+ document.getElementById('resultFamily').textContent='Connexion à Pl@ntNet…';
  document.getElementById('confidence').textContent='Confiance : …';
- document.getElementById('resultDescription').textContent='Quelques secondes…';
+ document.getElementById('resultDescription').textContent='Préparation de la photo…';
  try{
-   const form=new FormData(); form.append('images',file); form.append('organs','auto');
-   const url='https://my-api.plantnet.org/v2/identify/all?lang=fr&nb-results=3&api-key='+encodeURIComponent(key);
+   // Pl@ntNet accepte JPG/PNG. On convertit automatiquement les photos du téléphone en JPEG.
+   const imageBlob=await toJpeg(file);
+   const form=new FormData();
+   form.append('images',imageBlob,'plantify-photo.jpg');
+   form.append('organs','auto');
+   const url='https://my-api.plantnet.org/v2/identify/all?lang=fr&nb-results=3&api-key='+encodeURIComponent(key.trim());
    const r=await fetch(url,{method:'POST',body:form});
-   if(!r.ok){throw new Error('API '+r.status)}
-   const data=await r.json(); const best=data.results&&data.results[0];
-   if(!best){throw new Error('Aucun résultat')}
+   const raw=await r.text();
+   let data={}; try{data=JSON.parse(raw)}catch(e){}
+   if(!r.ok){
+      const detail=data.message||data.error||('HTTP '+r.status);
+      throw new Error(detail+' ('+r.status+')');
+   }
+   const best=data.results&&data.results[0];
+   if(!best)throw new Error('Aucun résultat retourné par Pl@ntNet.');
    const sp=best.species||{};
    const common=(sp.commonNames&&sp.commonNames[0])||sp.scientificNameWithoutAuthor||data.bestMatch||'Plante inconnue';
    const scientific=sp.scientificNameWithoutAuthor||data.bestMatch||'';
-   const family=sp.family?.scientificNameWithoutAuthor||'Famille non déterminée';
+   const family=(sp.family&&sp.family.scientificNameWithoutAuthor)||sp.family||'Famille non déterminée';
    const pct=Math.round((best.score||0)*100);
    document.getElementById('resultName').textContent=common;
    document.getElementById('resultFamily').textContent=(common!==scientific&&scientific?scientific+' · ':'')+'Famille : '+family;
@@ -117,14 +126,33 @@ async function identify(){
    document.getElementById('resultDescription').textContent='Identification réalisée par Pl@ntNet. Vérifiez la photo et le niveau de confiance avant d’ajouter la plante à votre collection.';
    window.lastIdentification={name:common,scientific,family,score:pct};
  }catch(err){
-   console.error(err);
+   console.error('Plantify / Pl@ntNet:',err);
    document.getElementById('resultName').textContent='Identification impossible';
-   document.getElementById('resultFamily').textContent='Vérifiez votre clé API et les autorisations de domaine Pl@ntNet.';
+   document.getElementById('resultFamily').textContent='Erreur Pl@ntNet : '+err.message;
    document.getElementById('confidence').textContent='Confiance : —';
-   document.getElementById('resultDescription').textContent='Vous pouvez réessayer avec une photo nette de la plante, idéalement la feuille ou la fleur.';
-   toast('❌ La reconnaissance a échoué');
+   document.getElementById('resultDescription').textContent='Vérifiez que votre clé est autorisée pour pasquetmicka-byte.github.io, puis réessayez.';
+   toast('❌ '+err.message);
  }
 }
+function toJpeg(file){
+ return new Promise((resolve,reject)=>{
+   if(file.type==='image/jpeg'||file.type==='image/png'){
+     // PNG est accepté tel quel, JPEG aussi.
+     resolve(file); return;
+   }
+   const img=new Image(); const u=URL.createObjectURL(file);
+   img.onload=()=>{
+     URL.revokeObjectURL(u);
+     const max=1600, scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+     const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.naturalWidth*scale)); c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+     c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+     c.toBlob(b=>b?resolve(b):reject(new Error('Impossible de convertir la photo.')),'image/jpeg',0.88);
+   };
+   img.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Format de photo non compatible.'))};
+   img.src=u;
+ });
+}
+
 function addPlant(){const n=window.lastIdentification?.name||'Plante identifiée';toast('🌿 '+n+' ajoutée à votre collection !');setTimeout(()=>show('plants'),900)}
 document.querySelector('.gallery').onclick=()=>document.getElementById('file').click();
 </script>
