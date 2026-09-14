@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#063c32">
+  <link rel="manifest" href="manifest.json">
+  <title>Apéro To Go</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:#f7f3eb;color:#092f2a}
+    button{font:inherit;border:0;cursor:pointer}.app{max-width:520px;margin:auto;min-height:100vh;background:#f7f3eb;box-shadow:0 0 30px #0001}
+    .top{position:sticky;top:0;z-index:5;background:#063c32;color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+    .brand{font-weight:800;font-size:21px}.brand span{color:#ff711f;font-style:italic}.loc{font-size:13px;border:1px solid #ffffff55;padding:8px 11px;border-radius:20px}
+    .screen{display:none}.screen.active{display:block}
+    .home-image{width:100%;display:block}.hotspots{padding:12px 14px 90px}
+    .choice{background:white;border-radius:18px;padding:16px;margin:10px 0;box-shadow:0 3px 14px #173f3512;display:flex;gap:14px;align-items:center}
+    .choice img{width:92px;height:76px;object-fit:cover;border-radius:12px}.choice h3{margin:0 0 5px}.price{font-size:21px;font-weight:900}.orange{color:#ff6b18}.green{color:#075247}
+    .small{font-size:13px;color:#64736e}.cta{width:100%;background:#ff6b18;color:#fff;padding:14px;border-radius:14px;font-weight:800;margin-top:10px}
+    .back{padding:16px;font-weight:800}.detail{padding:0 16px 100px}.detail img{width:100%;border-radius:20px}.card{background:white;padding:18px;border-radius:18px;margin-top:12px}
+    .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);display:flex;background:#fff;border-top:1px solid #ddd;padding:9px 4px;z-index:10}
+    .bottom button{background:none;flex:1;color:#53635f;font-size:11px}.bottom button strong{display:block;font-size:20px;margin-bottom:3px}.bottom .sel{color:#063c32;font-weight:800}
+    .qr{font-size:90px;text-align:center;line-height:1;margin:20px}.success{text-align:center}
+    .field{padding:13px;border:1px solid #ddd;border-radius:12px;width:100%;margin:7px 0;background:#fff}
+    .badge{display:inline-block;background:#e9f0ea;border-radius:20px;padding:6px 9px;font-size:12px;margin:3px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="top"><div class="brand">Apéro <span>To Go</span></div><div class="loc">📍 Annemasse ▾</div></header>
+
+  <main id="home" class="screen active">
+    <img class="home-image" src="home-visual.png" alt="Accueil Apéro To Go">
+    <div class="hotspots">
+      <button class="choice" onclick="show('offers')"><div>📦</div><div><h3>Choisir une box</h3><div class="small">3 formules disponibles ce soir</div></div><b>›</b></button>
+      <button class="choice" onclick="show('reservations')"><div>🎟️</div><div><h3>Mes réservations</h3><div class="small">Retrouvez vos commandes et QR codes</div></div><b>›</b></button>
+    </div>
+  </main>
+
+  <main id="offers" class="screen">
+    <div class="back" onclick="show('home')">‹ Accueil</div>
+    <div style="padding:0 16px 100px"><h1>Choisissez votre apéro</h1>
+      <div class="choice"><img src="home-visual.png"><div><h3>Box Apéro</h3><div class="price orange">9,90 €</div><div class="small">Produits emballés · 1–2 pers.</div></div></div>
+      <div class="choice"><img src="home-visual.png"><div><h3>Box Apéro XL</h3><div class="price green">15,90 €</div><div class="small">Produits emballés · 3–5 pers.</div></div></div>
+      <div class="choice"><img src="home-visual.png"><div><h3>La Planche To Go</h3><div class="price green">à partir de 15,90 €</div><div class="small">Préparée par fromager, traiteur ou restaurant.</div></div></div>
+      <button class="cta" onclick="show('detail')">Voir les offres près de moi</button>
+    </div>
+  </main>
+
+  <main id="detail" class="screen">
+    <div class="back" onclick="show('offers')">‹ Choisir une formule</div>
+    <div class="detail">
+      <img src="home-visual.png">
+      <div class="card"><span class="badge">Planche préparée</span><h1>La Planche To Go</h1><div class="price green">15,90 €</div>
+        <p>Une planche apéro généreuse préparée avec les produits disponibles chez votre commerçant.</p>
+        <p>🧀 Fromages · 🥩 Charcuterie · 🫒 Olives · 🥖 Pain / crackers</p>
+        <div class="small">Retrait aujourd’hui · 18h–20h · Annemasse</div>
+        <button class="cta" onclick="show('payment')">Réserver ma planche</button>
+      </div>
+    </div>
+  </main>
+
+  <main id="payment" class="screen">
+    <div class="back" onclick="show('detail')">‹ Retour</div>
+    <div style="padding:0 16px 100px"><h1>Paiement</h1><div class="card"><b>La Planche To Go</b><p>Carrefour Annemasse · 15,90 €</p><input class="field" placeholder="Nom sur la carte"><input class="field" placeholder="Numéro de carte"><button class="cta" onclick="confirmReservation()">Payer 15,90 €</button></div></div>
+  </main>
+
+  <main id="reservations" class="screen">
+    <div class="back" onclick="show('home')">‹ Accueil</div>
+    <div style="padding:0 16px 100px"><h1>Ma réservation</h1><div class="card success"><div>✅ Réservation confirmée</div><div class="qr">▦</div><h2>La Planche To Go</h2><p>Carrefour Annemasse</p><p>Retrait aujourd’hui · 18h–20h</p><b>Présentez ce QR code en magasin.</b></div></div>
+  </main>
+
+  <main id="profile" class="screen">
+    <div style="padding:22px 16px 100px"><h1>Mon profil</h1><div class="card"><h3>👤 Mon compte</h3><p>Mes informations</p><p>Mes favoris</p><p>Historique de mes achats</p><p>Aide & contact</p></div></div>
+  </main>
+
+  <nav class="bottom">
+    <button class="sel" onclick="show('home')"><strong>⌂</strong>Accueil</button>
+    <button onclick="show('offers')"><strong>⌕</strong>Rechercher</button>
+    <button onclick="show('reservations')"><strong>▢</strong>Réservations</button>
+    <button onclick="show('profile')"><strong>♡</strong>Profil</button>
+  </nav>
+</div>
+<script>
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function confirmReservation(){show('reservations')}
+</script>
+</body>
+</html>
