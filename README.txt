@@ -1,19 +1,12 @@
-# Apéro To Go — prototype V1
+APÉRO TO GO 2.0 — PROTOTYPE
 
-Cette version est un prototype mobile fonctionnel.
+Cette version transforme le prototype en marketplace de démonstration inspirée du parcours général des applications anti-gaspi : accueil, carte, commerces, paniers disponibles, réservation, code de retrait et profil.
 
-## Ce qui fonctionne
-- Accueil avec le visuel Apéro To Go fourni
-- 3 formules : Box Apéro 9,90 €, Box Apéro XL 15,90 €, La Planche To Go à partir de 15,90 €
-- Navigation entre les pages
-- Page détail
-- Faux parcours de paiement
-- Confirmation avec QR code
-- Réservations
-- Profil
+IMPORTANT : les commerces, stocks, réservations, localisation et paiement sont simulés localement dans le navigateur. Aucun paiement réel et aucune réservation réelle ne sont envoyés à un serveur.
 
-## Important
-Le paiement, les comptes clients, les magasins, le stock et le QR code ne sont pas encore reliés à une vraie base de données : cette V1 sert à tester l'interface et le parcours.
+Fichiers :
+- index.html : application
+- manifest.json : installation type PWA
+- home-visual.png : visuel de la page d'accueil
 
-## Pour tester
-Ouvrir `index.html` dans un navigateur.
+Pour GitHub Pages : remplacer l'ancien index.html et home-visual.png par ceux-ci, puis conserver manifest.json. Le fichier index.html doit rester à la racine du dépôt.

@@ -1,9 +1,10 @@
 {
-  "name": "Apéro To Go",
-  "short_name": "Apéro To Go",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#f7f3eb",
-  "theme_color": "#063c32",
-  "lang": "fr"
+  "name":"Apéro To Go",
+  "short_name":"Apéro To Go",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f7f3eb",
+  "theme_color":"#0a4a3f",
+  "lang":"fr",
+  "icons":[]
 }
